@@ -1,0 +1,13 @@
+*.pyc
+__pycache__/
+*.sqlite3
+*.log
+.env
+db.sqlite3
+media/manuals/*
+!media/manuals/.gitkeep
+media/demo_manuals/*
+!media/demo_manuals/.gitkeep
+staticfiles/
+.pytest_cache/
+venv/

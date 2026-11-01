@@ -1,0 +1,234 @@
+{% extends 'base.html' %}
+
+{% block title %}Field Engineer AI Maintenance Assistant{% endblock %}
+
+{% block content %}
+<!-- Machine Selection Banner -->
+<div class="card card-industrial mb-4">
+    <div class="card-body p-3">
+        <form method="GET" action="{% url 'dashboard:engineer' %}" class="row g-2 align-items-center">
+            <div class="col-12 col-md-auto">
+                <label for="machineSelector" class="col-form-label text-cyan fw-bold small text-uppercase">
+                    <i class="bi bi-cpu-fill me-1"></i> Active Equipment Machine:
+                </label>
+            </div>
+            <div class="col-12 col-md-5 col-lg-4">
+                <select id="machineSelector" name="machine_id" class="form-select form-select-industrial" onchange="this.form.submit()">
+                    <option value="">-- Select Equipment Machine --</option>
+                    {% for m in machines %}
+                        <option value="{{ m.id }}" {% if selected_machine and selected_machine.id == m.id %}selected{% endif %}>
+                            {{ m.name }} [{{ m.model_number }}]
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-12 col-md-auto ms-auto d-flex align-items-center gap-2">
+                {% if selected_machine %}
+                    <span class="badge bg-dark border border-cyan text-info">
+                        <i class="bi bi-shield-check me-1"></i> Scope: {{ selected_machine.name }} ONLY
+                    </span>
+                    <span class="badge bg-secondary">
+                        {{ manuals_for_machine.count }} Manual(s) Indexed
+                    </span>
+                {% else %}
+                    <span class="text-warning small"><i class="bi bi-exclamation-circle me-1"></i> Please select a machine to begin query</span>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if selected_machine %}
+    <!-- Selected Machine Specs Header -->
+    <div class="machine-banner">
+        <div>
+            <div class="machine-banner-title">
+                <i class="bi bi-gear text-cyan me-2"></i> {{ selected_machine.name }}
+            </div>
+            <div class="machine-banner-meta mt-1">
+                Model: <strong>{{ selected_machine.model_number }}</strong> &bull; 
+                Manufacturer: <strong>{{ selected_machine.manufacturer|default:"OEM Specification" }}</strong> &bull;
+                Status: <span class="badge bg-success-subtle text-success">{{ selected_machine.get_status_display }}</span>
+            </div>
+        </div>
+        <div>
+            {% if manuals_for_machine %}
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-outline-industrial dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-book me-1"></i> Available Manuals ({{ manuals_for_machine.count }})
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-dark">
+                        {% for man in manuals_for_machine %}
+                            <li>
+                                <a class="dropdown-item d-flex justify-content-between align-items-center" href="{% url 'manuals:view_pdf' man.id %}" target="_blank">
+                                    <span>{{ man.title }}</span>
+                                    <span class="badge bg-secondary ms-2">{{ man.revision }}</span>
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Question Input Box -->
+    <div class="card card-industrial mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-chat-left-text text-primary me-2"></i> Equipment Maintenance AI Inquiry</span>
+            <span class="text-secondary small">Strict Evidence-Grounded RAG</span>
+        </div>
+        <div class="card-body">
+            <div class="mb-3">
+                <textarea id="questionInput" class="form-control form-control-industrial" rows="3" 
+                    placeholder="Ask any technical question regarding {{ selected_machine.name }} (e.g., 'What is the recommended spindle bearing lubrication procedure and oil spec?', 'Explain the emergency brake recovery protocol')..."></textarea>
+            </div>
+
+            <!-- Preset Queries Helper -->
+            <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                <span class="text-muted small text-uppercase">Sample Queries:</span>
+                <button type="button" class="btn btn-sm btn-outline-industrial" onclick="usePresetQuestion('What is the recommended spindle lubrication procedure and interval?')">
+                    Spindle Lubrication
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-industrial" onclick="usePresetQuestion('What are the daily startup and safety inspection checks?')">
+                    Daily Safety Checks
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-industrial" onclick="usePresetQuestion('What is the maximum operating temperature of this machine?')">
+                    Operating Temperature (Test Insufficient Evidence)
+                </button>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="text-muted small">
+                    <i class="bi bi-lock-fill text-cyan me-1"></i> Passages from other machines are strictly isolated and barred from context.
+                </div>
+                <button type="button" class="btn btn-cyan-industrial px-4" onclick="submitQuestion()">
+                    <i class="bi bi-send-fill me-1"></i> Query AI Manual Assistant
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Q&A Results & Source Evidence Verification Panel -->
+    <div id="qaResultsContainer" style="display: none;" class="mb-4">
+        <div class="row g-4">
+            
+            <!-- Left Panel: Grounded AI Answer -->
+            <div class="col-12 col-lg-7">
+                <div class="card card-industrial h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="bi bi-robot text-cyan me-2"></i> Verified Technical Answer
+                        </div>
+                        <div class="d-flex gap-2">
+                            <span id="questionStatusBadge" class="badge badge-status">STATUS</span>
+                            <span id="confidenceScoreBadge" class="badge bg-dark border border-secondary text-secondary">Relevance: 0%</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="answer-box mb-3">
+                            <div id="answerText"></div>
+                        </div>
+
+                        <!-- User Feedback Controls -->
+                        <div id="feedbackSection" class="d-flex align-items-center justify-content-between pt-3 border-top border-secondary border-opacity-25" style="display: none;">
+                            <span class="text-secondary small">Was this technical answer accurate and helpful?</span>
+                            <div class="d-flex gap-2">
+                                <button type="button" id="btnHelpful" class="btn-feedback" onclick="submitFeedback('HELPFUL')">
+                                    <i class="bi bi-hand-thumbs-up me-1"></i> Helpful
+                                </button>
+                                <button type="button" id="btnUnhelpful" class="btn-feedback" onclick="submitFeedback('UNHELPFUL')">
+                                    <i class="bi bi-hand-thumbs-down me-1"></i> Inaccurate
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Source Evidence & PDF Reference Cards -->
+            <div class="col-12 col-lg-5">
+                <div class="card card-industrial h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-file-earmark-check text-success me-2"></i> Verifiable Source References</span>
+                        <span class="text-muted small">PyMuPDF Page Preservation</span>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-secondary small mb-3">
+                            The following exact manual excerpts were retrieved to ground the answer. Click the link icon on any excerpt to view the original PDF document.
+                        </p>
+                        <div id="evidenceList">
+                            <!-- Dynamic Evidence Cards Injected Here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+{% else %}
+    <!-- Empty State: Machine Not Selected -->
+    <div class="card card-industrial text-center py-5 my-4">
+        <div class="card-body">
+            <div class="d-inline-flex p-3 rounded-circle bg-dark border border-secondary mb-3">
+                <i class="bi bi-cpu fs-1 text-cyan"></i>
+            </div>
+            <h4 class="fw-bold text-white mb-2">No Equipment Machine Selected</h4>
+            <p class="text-secondary col-md-6 mx-auto mb-4">
+                To guarantee machine-specific precision and prevent cross-equipment data leakage, please select an equipment machine from the dropdown above to load its manuals and initiate queries.
+            </p>
+            {% if machines %}
+                <button type="button" class="btn btn-primary-industrial" onclick="document.getElementById('machineSelector').focus()">
+                    <i class="bi bi-arrow-up-circle me-1"></i> Select Active Machine
+                </button>
+            {% else %}
+                <p class="text-warning small">No machines have been registered yet. Please contact an Administrator.</p>
+            {% endif %}
+        </div>
+    </div>
+{% endif %}
+
+<!-- Personal Query History Accordion -->
+{% if user_questions %}
+<div class="card card-industrial mt-4">
+    <div class="card-header">
+        <i class="bi bi-clock-history me-2"></i> Your Recent Maintenance Queries
+    </div>
+    <div class="table-responsive">
+        <table class="table table-industrial">
+            <thead>
+                <tr>
+                    <th>Timestamp</th>
+                    <th>Equipment</th>
+                    <th>Question</th>
+                    <th>Status</th>
+                    <th>Citations</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for q in user_questions %}
+                <tr>
+                    <td class="small text-muted mono">{{ q.created_at|date:"Y-m-d H:i" }}</td>
+                    <td><span class="badge bg-dark border border-secondary">{{ q.machine.name }}</span></td>
+                    <td class="text-white fw-medium">{{ q.question_text|truncatechars:70 }}</td>
+                    <td>
+                        {% if q.status == 'ANSWERED' %}
+                            <span class="badge badge-status badge-status-indexed">Verified</span>
+                        {% elif q.status == 'INSUFFICIENT_EVIDENCE' %}
+                            <span class="badge badge-status badge-status-failed">Insufficient Info</span>
+                        {% else %}
+                            <span class="badge badge-status">{{ q.status }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="small">{{ q.evidence_count }} source passage(s)</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}

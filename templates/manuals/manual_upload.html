@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block title %}Upload Equipment Manual - Administrator Portal{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-6">
+        
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 class="fw-bold mb-0"><i class="bi bi-file-earmark-arrow-up text-primary me-2"></i> Ingest Equipment Manual PDF</h3>
+            <a href="{% url 'manuals:list' %}" class="btn btn-sm btn-outline-industrial">
+                <i class="bi bi-arrow-left me-1"></i> Back to Manuals
+            </a>
+        </div>
+
+        <div class="card card-industrial">
+            <div class="card-body p-4">
+                <form method="POST" enctype="multipart/form-data" onsubmit="showLoading('Extracting PDF text via PyMuPDF and generating vector embeddings...')">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small fw-bold">ASSOCIATE TO EQUIPMENT MACHINE *</label>
+                        <select name="machine" class="form-select form-select-industrial" required>
+                            <option value="">-- Choose Target Machine --</option>
+                            {% for m in machines %}
+                                <option value="{{ m.id }}">{{ m.name }} [{{ m.model_number }}]</option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text text-muted">Retrieval is strictly isolated to the selected equipment.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small fw-bold">MANUAL TITLE *</label>
+                        <input type="text" name="title" class="form-control form-control-industrial" required 
+                            placeholder="e.g. Operator & Maintenance Manual">
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label text-secondary small fw-bold">REVISION / VERSION</label>
+                            <input type="text" name="revision" class="form-control form-control-industrial" 
+                                value="Rev 1.0" placeholder="e.g. Rev 2.1, 2024-Q1">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label text-secondary small fw-bold">MODEL APPLICABILITY</label>
+                            <input type="text" name="model_information" class="form-control form-control-industrial" 
+                                placeholder="e.g. Serial 1000-5000">
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label text-secondary small fw-bold">MANUAL PDF DOCUMENT *</label>
+                        <input type="file" name="file" class="form-control form-control-industrial" accept=".pdf,application/pdf" required>
+                        <div class="form-text text-muted">Maximum file size: 25 MB. Only valid, readable PDF documents are accepted.</div>
+                    </div>
+
+                    <div class="alert alert-dark border border-secondary small text-secondary mb-4">
+                        <i class="bi bi-info-circle text-info me-1"></i>
+                        <strong>Ingestion Pipeline Details:</strong>
+                        Upon upload, PyMuPDF extracts text page-by-page preserving 1-indexed page boundaries. 
+                        Text is segmented into overlapping chunks, embedded, and indexed into the vector store bound to the selected machine.
+                    </div>
+
+                    <button type="submit" class="btn btn-primary-industrial w-100 py-2 fw-semibold">
+                        <i class="bi bi-cloud-arrow-up-fill me-1"></i> Upload and Index Manual
+                    </button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

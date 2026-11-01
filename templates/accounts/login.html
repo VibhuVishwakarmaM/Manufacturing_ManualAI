@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block title %}Sign In - Manufacturing Manual AI Assistant{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center align-items-center py-5">
+    <div class="col-12 col-md-8 col-lg-5 col-xl-4">
+        
+        <div class="text-center mb-4">
+            <div class="d-inline-flex p-3 rounded-circle bg-dark border border-secondary mb-3">
+                <i class="bi bi-shield-lock text-cyan fs-1" style="color: var(--brand-cyan);"></i>
+            </div>
+            <h2 class="fw-bold">Operator Authentication</h2>
+            <p class="text-secondary small">Access equipment manuals, vector retrieval, and RAG maintenance assistant</p>
+        </div>
+
+        <div class="card card-industrial">
+            <div class="card-body p-4">
+                <form method="POST" action="{% url 'accounts:login' %}{% if request.GET.next %}?next={{ request.GET.next }}{% endif %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small fw-bold">OPERATOR USERNAME</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-dark border-secondary text-secondary"><i class="bi bi-person"></i></span>
+                            <input type="text" id="loginUsername" name="username" class="form-control form-control-industrial" required autofocus placeholder="e.g. admin, engineer, supervisor">
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label text-secondary small fw-bold">PASSWORD</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-dark border-secondary text-secondary"><i class="bi bi-key"></i></span>
+                            <input type="password" id="loginPassword" name="password" class="form-control form-control-industrial" required placeholder="Enter password">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary-industrial w-100 py-2 fw-semibold">
+                        <i class="bi bi-box-arrow-in-right me-1"></i> Authenticate & Enter System
+                    </button>
+                </form>
+
+                <!-- Quick Hackathon Role Credentials Quick-Fill -->
+                <div class="mt-4 pt-3 border-top border-secondary border-opacity-25 text-center">
+                    <span class="text-muted small d-block mb-2 text-uppercase tracking-wider">Demo Role Quick-Fill (Click to populate)</span>
+                    <div class="d-flex justify-content-center gap-2">
+                        <button type="button" class="btn btn-sm btn-outline-industrial" onclick="fillCredentials('admin', 'AdminPass123!')">
+                            <i class="bi bi-shield-fill text-danger me-1"></i> Admin
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-industrial" onclick="fillCredentials('engineer', 'EngineerPass123!')">
+                            <i class="bi bi-tools text-info me-1"></i> Engineer
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-industrial" onclick="fillCredentials('supervisor', 'SupervisorPass123!')">
+                            <i class="bi bi-eye text-warning me-1"></i> Supervisor
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function fillCredentials(user, pass) {
+    document.getElementById('loginUsername').value = user;
+    document.getElementById('loginPassword').value = pass;
+}
+</script>
+{% endblock %}

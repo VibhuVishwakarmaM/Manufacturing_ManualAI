@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block title %}System Pipeline Configuration - Admin Portal{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="mb-1 fw-bold"><i class="bi bi-sliders text-primary me-2"></i> System & RAG Pipeline Configuration</h2>
+        <p class="text-secondary mb-0">Active runtime configuration parameters loaded from environment (.env). Sensitive API keys are redacted.</p>
+    </div>
+    <span class="badge bg-success-subtle text-success border border-success px-3 py-2">
+        <i class="bi bi-check-circle me-1"></i> Centralized Config Active
+    </span>
+</div>
+
+<div class="row g-4">
+    <!-- AI & Model Providers -->
+    <div class="col-12 col-md-6">
+        <div class="card card-industrial h-100">
+            <div class="card-header">
+                <i class="bi bi-cpu text-info me-2"></i> AI Providers & Embedding Infrastructure
+            </div>
+            <div class="card-body">
+                <table class="table table-industrial">
+                    <tbody>
+                        <tr>
+                            <td class="text-secondary">LLM Provider</td>
+                            <td class="text-white fw-bold mono">{{ config.LLM_PROVIDER|upper }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-secondary">LLM Model Name</td>
+                            <td class="text-white mono">{{ config.LLM_MODEL }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-secondary">Embedding Provider</td>
+                            <td class="text-white fw-bold mono">{{ config.EMBEDDING_PROVIDER|upper }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-secondary">Embedding Model</td>
+                            <td class="text-white mono">{{ config.EMBEDDING_MODEL }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-secondary">Vector Dimension</td>
+                            <td class="text-white mono">{{ config.EMBEDDING_DIMENSION }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-secondary">Vector Store Engine</td>
+                            <td class="text-white fw-bold mono">{{ config.VECTOR_STORE_PROVIDER|upper }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-secondary">Vector Collection</td>
+                            <td class="text-white mono">{{ config.VECTOR_COLLECTION }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chunking & Retrieval Parameters -->
+    <div class="col-12 col-md-6">
+        <div class="card card-industrial h-100">
+            <div class="card-header">
+                <i class="bi bi-diagram-3 text-warning me-2"></i> Chunking Strategy & Retrieval Thresholds
+            </div>
+            <div class="card-body">
+                <table class="table table-industrial">
+                    <tbody>
+                        <tr>
+                            <td class="text-secondary">Chunk Size</td>
+                            <td class="text-white mono">{{ config.CHUNK_SIZE }} characters / tokens</td>
+                        </tr>
+                        <tr>
+                            <td class="text-secondary">Chunk Overlap</td>
+                            <td class="text-white mono">{{ config.CHUNK_OVERLAP }} characters / tokens</td>
+                        </tr>
+                        <tr>
+                            <td class="text-secondary">Retrieval Top-K</td>
+                            <td class="text-white mono">{{ config.TOP_K }} passages</td>
+                        </tr>
+                        <tr>
+                            <td class="text-secondary">Similarity Threshold</td>
+                            <td class="text-white mono">{{ config.SIMILARITY_THRESHOLD }} (Cosine similarity)</td>
+                        </tr>
+                        <tr>
+                            <td class="text-secondary">RAG Prompt Version</td>
+                            <td class="text-white mono">{{ config.RAG_PROMPT_VERSION }}</td>
+                        </tr>
+                        <tr>
+                            <td class="text-secondary">Max Upload Size</td>
+                            <td class="text-white mono">{{ config.MAX_UPLOAD_SIZE_MB }} MB</td>
+                        </tr>
+                        <tr>
+                            <td class="text-secondary">Database Backend</td>
+                            <td class="text-white mono">{{ config.DATABASE_ENGINE }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

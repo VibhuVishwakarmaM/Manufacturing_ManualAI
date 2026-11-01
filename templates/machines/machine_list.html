@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block title %}Equipment Catalog - Machines Directory{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="mb-1 fw-bold"><i class="bi bi-cpu text-info me-2"></i> Equipment & Machinery Directory</h2>
+        <p class="text-secondary mb-0">Registered manufacturing equipment units, assigned manuals, and operational status.</p>
+    </div>
+    {% if is_admin %}
+    <a href="{% url 'machines:create' %}" class="btn btn-primary-industrial">
+        <i class="bi bi-plus-circle me-1"></i> Register New Machine
+    </a>
+    {% endif %}
+</div>
+
+<div class="card card-industrial">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-list-columns-reverse me-2"></i> Machinery Inventory</span>
+        <span class="text-secondary small">{{ machines.count }} Machine(s) Registered</span>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-industrial">
+            <thead>
+                <tr>
+                    <th>Machine Name</th>
+                    <th>Model Number</th>
+                    <th>Manufacturer</th>
+                    <th>Status</th>
+                    <th>Manuals</th>
+                    <th>Last Updated</th>
+                    {% if is_admin %}<th class="text-end">Actions</th>{% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for m in machines %}
+                <tr>
+                    <td class="fw-semibold text-white">
+                        <i class="bi bi-cpu text-primary me-2"></i> {{ m.name }}
+                    </td>
+                    <td class="mono">{{ m.model_number }}</td>
+                    <td>{{ m.manufacturer|default:"OEM Generic" }}</td>
+                    <td>
+                        {% if m.status == 'ACTIVE' %}
+                            <span class="badge bg-success-subtle text-success border border-success">Active</span>
+                        {% elif m.status == 'MAINTENANCE' %}
+                            <span class="badge bg-warning-subtle text-warning border border-warning">Maintenance</span>
+                        {% else %}
+                            <span class="badge bg-danger-subtle text-danger border border-danger">Decommissioned</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'manuals:list' %}?machine={{ m.id }}" class="badge bg-dark border border-secondary text-info text-decoration-none">
+                            <i class="bi bi-file-pdf me-1"></i> {{ m.manuals.count }} Manual(s)
+                        </a>
+                    </td>
+                    <td class="small text-muted">{{ m.updated_at|date:"Y-m-d" }}</td>
+                    {% if is_admin %}
+                    <td class="text-end">
+                        <div class="d-inline-flex gap-2">
+                            <a href="{% url 'machines:edit' m.id %}" class="btn btn-sm btn-outline-industrial" title="Edit Machine">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <form method="POST" action="{% url 'machines:delete' m.id %}" class="d-inline" onsubmit="return confirm('Are you sure you want to delete {{ m.name }}?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete Machine">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                    {% endif %}
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center py-4 text-secondary">
+                        No equipment registered yet.
+                        {% if is_admin %}
+                            <a href="{% url 'machines:create' %}" class="btn btn-sm btn-primary-industrial ms-2">Register Machine</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

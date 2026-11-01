@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %}Operational Audit Trail - Manufacturing Manual AI{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="mb-1 fw-bold"><i class="bi bi-shield-check text-success me-2"></i> Operational Audit Trail</h2>
+        <p class="text-secondary mb-0">Immutable tracking of operator actions, manual ingestion events, role updates, and inquiries.</p>
+    </div>
+</div>
+
+<div class="card card-industrial">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-journal-text me-2"></i> Audit Records</span>
+        <span class="text-secondary small">Non-sensitive operational telemetry</span>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-industrial">
+            <thead>
+                <tr>
+                    <th>Timestamp</th>
+                    <th>Operator</th>
+                    <th>Action</th>
+                    <th>Target Resource</th>
+                    <th>IP Address</th>
+                    <th>Metadata Details</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr>
+                    <td class="mono small text-muted">{{ log.timestamp|date:"Y-m-d H:i:s" }}</td>
+                    <td class="text-white fw-semibold">
+                        <i class="bi bi-person text-secondary me-1"></i>
+                        {{ log.user.username|default:"System" }}
+                    </td>
+                    <td>
+                        <span class="badge bg-dark border border-secondary text-info mono">{{ log.action }}</span>
+                    </td>
+                    <td>
+                        <span class="text-secondary">{{ log.resource_type }}</span>
+                        {% if log.resource_id %}
+                            <span class="mono small text-muted ms-1">#{{ log.resource_id|truncatechars:12 }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="mono small text-muted">{{ log.ip_address|default:"127.0.0.1" }}</td>
+                    <td class="mono small" style="max-width: 320px; word-break: break-all;">
+                        {{ log.metadata }}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center py-4 text-secondary">
+                        No audit events recorded yet.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

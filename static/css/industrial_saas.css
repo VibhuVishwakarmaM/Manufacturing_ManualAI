@@ -1,0 +1,413 @@
+/* ==========================================================================
+   MANUFACTURING MANUAL AI ASSISTANT - INDUSTRIAL SAAS DESIGN SYSTEM
+   ========================================================================== */
+
+:root {
+    --bg-dark: #0f141c;
+    --bg-surface: #171f2b;
+    --bg-surface-elevated: #1f2a3a;
+    --bg-surface-glass: rgba(23, 31, 43, 0.85);
+    --border-color: #2a3749;
+    --border-focus: #3b82f6;
+
+    --brand-primary: #2563eb;
+    --brand-primary-hover: #1d4ed8;
+    --brand-accent: #f59e0b; /* Industrial Amber / Warning */
+    --brand-cyan: #06b6d4;   /* Precision / Engineering */
+    --brand-success: #10b981;
+    --brand-danger: #ef4444;
+
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+
+    --card-radius: 10px;
+    --btn-radius: 6px;
+    --shadow-subtle: 0 4px 12px rgba(0, 0, 0, 0.25);
+    --shadow-glow-cyan: 0 0 15px rgba(6, 182, 212, 0.2);
+}
+
+body {
+    background-color: var(--bg-dark);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Typography & Headings */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--text-primary);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+}
+
+.mono {
+    font-family: var(--font-mono);
+}
+
+/* Navbar */
+.navbar-industrial {
+    background: var(--bg-surface-glass);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border-color);
+    padding: 0.75rem 1.5rem;
+}
+
+.brand-badge {
+    background: linear-gradient(135deg, #2563eb, #06b6d4);
+    color: #ffffff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-left: 0.5rem;
+}
+
+/* Cards & Containers */
+.card-industrial {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--card-radius);
+    box-shadow: var(--shadow-subtle);
+    transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.card-industrial:hover {
+    border-color: #3b4d63;
+}
+
+.card-industrial .card-header {
+    background-color: var(--bg-surface-elevated);
+    border-bottom: 1px solid var(--border-color);
+    font-weight: 600;
+    color: var(--text-primary);
+    padding: 0.85rem 1.25rem;
+    border-top-left-radius: var(--card-radius);
+    border-top-right-radius: var(--card-radius);
+}
+
+.card-industrial .card-body {
+    padding: 1.25rem;
+}
+
+/* Metric / Stat Tiles */
+.stat-tile {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--card-radius);
+    padding: 1.25rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-tile::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background-color: var(--brand-primary);
+}
+
+.stat-tile.stat-success::after { background-color: var(--brand-success); }
+.stat-tile.stat-amber::after { background-color: var(--brand-accent); }
+.stat-tile.stat-danger::after { background-color: var(--brand-danger); }
+.stat-tile.stat-cyan::after { background-color: var(--brand-cyan); }
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+}
+
+.stat-label {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 0.4rem;
+}
+
+/* Buttons */
+.btn-primary-industrial {
+    background-color: var(--brand-primary);
+    color: #ffffff;
+    border: none;
+    border-radius: var(--btn-radius);
+    font-weight: 500;
+    padding: 0.5rem 1.25rem;
+    transition: all 0.15s ease;
+}
+
+.btn-primary-industrial:hover {
+    background-color: var(--brand-primary-hover);
+    color: #ffffff;
+    box-shadow: 0 0 10px rgba(37, 99, 235, 0.4);
+}
+
+.btn-cyan-industrial {
+    background-color: var(--brand-cyan);
+    color: #0b1120;
+    font-weight: 600;
+    border: none;
+    border-radius: var(--btn-radius);
+    padding: 0.5rem 1.25rem;
+    transition: all 0.15s ease;
+}
+
+.btn-cyan-industrial:hover {
+    background-color: #0891b2;
+    color: #ffffff;
+    box-shadow: var(--shadow-glow-cyan);
+}
+
+.btn-outline-industrial {
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    background: transparent;
+    border-radius: var(--btn-radius);
+    padding: 0.5rem 1rem;
+    transition: all 0.15s ease;
+}
+
+.btn-outline-industrial:hover {
+    border-color: var(--text-primary);
+    color: var(--text-primary);
+    background-color: var(--bg-surface-elevated);
+}
+
+/* Form Controls */
+.form-control-industrial, .form-select-industrial {
+    background-color: #121924;
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    border-radius: var(--btn-radius);
+    padding: 0.65rem 0.9rem;
+}
+
+.form-control-industrial:focus, .form-select-industrial:focus {
+    background-color: #121924;
+    border-color: var(--brand-cyan);
+    color: var(--text-primary);
+    box-shadow: 0 0 0 0.2rem rgba(6, 182, 212, 0.25);
+    outline: none;
+}
+
+/* Tables */
+.table-industrial {
+    width: 100%;
+    color: var(--text-secondary);
+    margin-bottom: 0;
+}
+
+.table-industrial th {
+    background-color: var(--bg-surface-elevated);
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 2px solid var(--border-color);
+    padding: 0.75rem 1rem;
+}
+
+.table-industrial td {
+    border-bottom: 1px solid var(--border-color);
+    padding: 0.85rem 1rem;
+    vertical-align: middle;
+}
+
+.table-industrial tbody tr:hover {
+    background-color: var(--bg-surface-elevated);
+    color: var(--text-primary);
+}
+
+/* Badges */
+.badge-role {
+    font-weight: 600;
+    padding: 0.35rem 0.65rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.badge-role-admin { background-color: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #ef4444; }
+.badge-role-engineer { background-color: rgba(6, 182, 212, 0.2); color: #22d3ee; border: 1px solid #06b6d4; }
+.badge-role-supervisor { background-color: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid #f59e0b; }
+
+.badge-status {
+    padding: 0.3rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.badge-status-indexed { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid #10b981; }
+.badge-status-processing { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid #3b82f6; }
+.badge-status-failed { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid #ef4444; }
+.badge-status-uploaded { background: rgba(148, 163, 184, 0.15); color: #cbd5e1; border: 1px solid #64748b; }
+
+/* Evidence / Citation Callout Cards */
+.evidence-card {
+    background: #111822;
+    border: 1px solid #2d3b4f;
+    border-left: 4px solid var(--brand-cyan);
+    border-radius: 6px;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    transition: all 0.15s ease;
+}
+
+.evidence-card:hover {
+    border-color: var(--brand-cyan);
+    background: #151e2b;
+}
+
+.evidence-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    font-size: 0.85rem;
+}
+
+.evidence-source {
+    font-weight: 600;
+    color: var(--brand-cyan);
+}
+
+.evidence-page-badge {
+    background-color: var(--bg-surface-elevated);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-family: var(--font-mono);
+}
+
+.evidence-snippet {
+    color: #cbd5e1;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    background: #0b1118;
+    padding: 0.6rem 0.8rem;
+    border-radius: 4px;
+    border-left: 2px solid #334155;
+    font-family: var(--font-mono);
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+/* Machine Selector Pill */
+.machine-banner {
+    background: linear-gradient(90deg, #1e293b, #0f172a);
+    border: 1px solid #334155;
+    border-radius: var(--card-radius);
+    padding: 0.85rem 1.25rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.machine-banner-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.machine-banner-meta {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+/* Chat & Answer Box */
+.answer-box {
+    background-color: #16202c;
+    border: 1px solid #2a3749;
+    border-radius: 8px;
+    padding: 1.25rem;
+    line-height: 1.6;
+}
+
+.answer-box.insufficient-warning {
+    border-color: #f59e0b;
+    background-color: rgba(245, 158, 11, 0.08);
+}
+
+/* Feedback Buttons */
+.btn-feedback {
+    background: #1e293b;
+    border: 1px solid #334155;
+    color: var(--text-secondary);
+    padding: 0.35rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.btn-feedback:hover {
+    color: #ffffff;
+    background: #334155;
+}
+
+.btn-feedback.active-helpful {
+    background: rgba(16, 185, 129, 0.2);
+    border-color: #10b981;
+    color: #34d399;
+}
+
+.btn-feedback.active-unhelpful {
+    background: rgba(239, 68, 68, 0.2);
+    border-color: #ef4444;
+    color: #f87171;
+}
+
+/* Loading Spinner Overlay */
+.loading-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(15, 20, 28, 0.75);
+    backdrop-filter: blur(4px);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.spinner-industrial {
+    width: 3.5rem;
+    height: 3.5rem;
+    border: 4px solid #1e293b;
+    border-top: 4px solid var(--brand-cyan);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+footer {
+    margin-top: auto;
+    border-top: 1px solid var(--border-color);
+    background-color: var(--bg-surface);
+    padding: 1rem 0;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}

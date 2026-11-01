@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - Machinery Management{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-6">
+        
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 class="fw-bold mb-0">{{ title }}</h3>
+            <a href="{% url 'machines:list' %}" class="btn btn-sm btn-outline-industrial">
+                <i class="bi bi-arrow-left me-1"></i> Back to Machines
+            </a>
+        </div>
+
+        <div class="card card-industrial">
+            <div class="card-body p-4">
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small fw-bold">MACHINE / EQUIPMENT NAME *</label>
+                        <input type="text" name="name" class="form-control form-control-industrial" required 
+                            value="{{ machine.name|default:'' }}" placeholder="e.g. 5-Axis CNC Milling Center VF-2SS">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small fw-bold">MODEL NUMBER *</label>
+                        <input type="text" name="model_number" class="form-control form-control-industrial" required 
+                            value="{{ machine.model_number|default:'' }}" placeholder="e.g. VF2SS-2024">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small fw-bold">MANUFACTURER</label>
+                        <input type="text" name="manufacturer" class="form-control form-control-industrial" 
+                            value="{{ machine.manufacturer|default:'' }}" placeholder="e.g. Haas Automation Inc.">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small fw-bold">STATUS</label>
+                        <select name="status" class="form-select form-select-industrial">
+                            <option value="ACTIVE" {% if machine.status == 'ACTIVE' %}selected{% endif %}>Active / Operational</option>
+                            <option value="MAINTENANCE" {% if machine.status == 'MAINTENANCE' %}selected{% endif %}>Under Maintenance</option>
+                            <option value="DECOMMISSIONED" {% if machine.status == 'DECOMMISSIONED' %}selected{% endif %}>Decommissioned</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label text-secondary small fw-bold">DESCRIPTION & OPERATIONAL NOTES</label>
+                        <textarea name="description" class="form-control form-control-industrial" rows="3" 
+                            placeholder="Physical location, cell line, safety ratings, or notes...">{{ machine.description|default:'' }}</textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary-industrial w-100 py-2">
+                        <i class="bi bi-check2-circle me-1"></i> Save Machine Record
+                    </button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

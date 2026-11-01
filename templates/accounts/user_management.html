@@ -1,0 +1,199 @@
+{% extends 'base.html' %}
+
+{% block title %}User & Role Management - Administrator Portal{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="mb-1 fw-bold"><i class="bi bi-people-fill text-primary me-2"></i> User & RBAC Role Management</h2>
+        <p class="text-secondary mb-0">Manage system operators, assign backend-enforced Django groups, and control access permissions.</p>
+    </div>
+    <button class="btn btn-primary-industrial" data-bs-toggle="modal" data-bs-target="#createUserModal">
+        <i class="bi bi-person-plus me-1"></i> Register New User
+    </button>
+</div>
+
+<!-- Metrics Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-4 col-xl-2">
+        <div class="stat-tile">
+            <div class="stat-value">{{ total_users }}</div>
+            <div class="stat-label">Total Users</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-4 col-xl-2">
+        <div class="stat-tile stat-success">
+            <div class="stat-value">{{ active_users }}</div>
+            <div class="stat-label">Active Accounts</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-4 col-xl-2">
+        <div class="stat-tile stat-danger">
+            <div class="stat-value">{{ admin_count }}</div>
+            <div class="stat-label">Administrators</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-4 col-xl-3">
+        <div class="stat-tile stat-cyan">
+            <div class="stat-value">{{ engineer_count }}</div>
+            <div class="stat-label">Field Engineers</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-4 col-xl-3">
+        <div class="stat-tile stat-amber">
+            <div class="stat-value">{{ supervisor_count }}</div>
+            <div class="stat-label">Supervisors</div>
+        </div>
+    </div>
+</div>
+
+<!-- Users Table -->
+<div class="card card-industrial">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-table me-2"></i> System Operators Directory</span>
+        <span class="text-muted small">Backend Group Authorization Enforced</span>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-industrial">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Full Name</th>
+                    <th>Assigned Role</th>
+                    <th>Status</th>
+                    <th>Date Joined</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for u in users %}
+                <tr>
+                    <td class="fw-semibold text-white">
+                        <i class="bi bi-person-circle text-secondary me-2"></i>
+                        {{ u.username }}
+                        {% if u.id == request.user.id %}
+                            <span class="badge bg-secondary ms-1">You</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ u.get_full_name|default:"&mdash;" }}</td>
+                    <td>
+                        <span class="badge badge-role 
+                            {% if u.current_role == 'Administrator' %}badge-role-admin
+                            {% elif u.current_role == 'Supervisor' %}badge-role-supervisor
+                            {% else %}badge-role-engineer{% endif %}">
+                            {{ u.current_role|default:"None" }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if u.is_active %}
+                            <span class="badge bg-success-subtle text-success border border-success"><i class="bi bi-check-circle me-1"></i> Active</span>
+                        {% else %}
+                            <span class="badge bg-danger-subtle text-danger border border-danger"><i class="bi bi-slash-circle me-1"></i> Inactive</span>
+                        {% endif %}
+                    </td>
+                    <td class="small text-muted">{{ u.date_joined|date:"Y-m-d H:i" }}</td>
+                    <td class="text-end">
+                        <div class="d-inline-flex gap-2">
+                            <!-- Change Role Modal Button -->
+                            <button class="btn btn-sm btn-outline-industrial" data-bs-toggle="modal" data-bs-target="#changeRoleModal{{ u.id }}" title="Change Role">
+                                <i class="bi bi-person-gear"></i> Role
+                            </button>
+
+                            <!-- Toggle Status Form -->
+                            {% if u.id != request.user.id %}
+                            <form method="POST" action="{% url 'accounts:user_toggle_status' u.id %}" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm {% if u.is_active %}btn-outline-danger{% else %}btn-outline-success{% endif %}" title="Toggle Active Status">
+                                    {% if u.is_active %}<i class="bi bi-lock"></i> Deactivate{% else %}<i class="bi bi-unlock"></i> Activate{% endif %}
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
+
+                        <!-- Role Change Modal -->
+                        <div class="modal fade" id="changeRoleModal{{ u.id }}" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog text-start">
+                                <div class="modal-content card-industrial">
+                                    <div class="modal-header border-secondary">
+                                        <h5 class="modal-title text-white">Modify Role: {{ u.username }}</h5>
+                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <form method="POST" action="{% url 'accounts:user_change_role' u.id %}">
+                                        {% csrf_token %}
+                                        <div class="modal-body">
+                                            <p class="text-secondary small">Select the new Django Group for this user. This updates backend permissions immediately.</p>
+                                            <label class="form-label text-secondary small fw-bold">ASSIGNED GROUP</label>
+                                            <select name="role" class="form-select form-select-industrial">
+                                                {% for r in all_roles %}
+                                                    <option value="{{ r }}" {% if u.current_role == r %}selected{% endif %}>{{ r }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="modal-footer border-secondary">
+                                            <button type="button" class="btn btn-outline-industrial" data-bs-dismiss="modal">Cancel</button>
+                                            <button type="submit" class="btn btn-primary-industrial">Save Role Change</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Create User Modal -->
+<div class="modal fade" id="createUserModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content card-industrial">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title text-white"><i class="bi bi-person-plus text-primary me-2"></i> Register New Operator</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{% url 'accounts:user_create' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small fw-bold">USERNAME *</label>
+                        <input type="text" name="username" class="form-control form-control-industrial" required placeholder="e.g. jdoe_engineer">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small fw-bold">EMAIL</label>
+                        <input type="email" name="email" class="form-control form-control-industrial" placeholder="operator@plant.internal">
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label text-secondary small fw-bold">FIRST NAME</label>
+                            <input type="text" name="first_name" class="form-control form-control-industrial">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label text-secondary small fw-bold">LAST NAME</label>
+                            <input type="text" name="last_name" class="form-control form-control-industrial">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small fw-bold">PASSWORD *</label>
+                        <input type="password" name="password" class="form-control form-control-industrial" required minlength="6">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small fw-bold">ROLE / DJANGO GROUP *</label>
+                        <select name="role" class="form-select form-select-industrial" required>
+                            {% for r in all_roles %}
+                                <option value="{{ r }}" {% if r == 'Engineer' %}selected{% endif %}>{{ r }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-outline-industrial" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary-industrial">Create Account</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

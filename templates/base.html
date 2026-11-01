@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Manufacturing Manual AI Assistant{% endblock %}</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap 5 & Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- Industrial SaaS Custom Stylesheet -->
+    <link rel="stylesheet" href="/static/css/industrial_saas.css">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+    <!-- Primary Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-industrial sticky-top">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand d-flex align-items-center" href="{% url 'dashboard:index' %}">
+                <i class="bi bi-gear-wide-connected text-primary fs-4 me-2"></i>
+                <span class="fw-bold tracking-tight">MANUFACTURING MANUAL AI</span>
+                <span class="brand-badge ms-2">ENTERPRISE RAG</span>
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navContent">
+                {% if user.is_authenticated %}
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3">
+                    {% if CURRENT_USER_ROLE == 'Administrator' %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'dashboard:admin' %}"><i class="bi bi-speedometer2 me-1"></i> Admin Portal</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'machines:list' %}"><i class="bi bi-cpu me-1"></i> Machines</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'manuals:list' %}"><i class="bi bi-file-earmark-pdf me-1"></i> Manuals</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'accounts:user_management' %}"><i class="bi bi-people me-1"></i> Users & Roles</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'audit_logs:log_list' %}"><i class="bi bi-shield-check me-1"></i> Audit Logs</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'dashboard:system_config' %}"><i class="bi bi-sliders me-1"></i> System Config</a>
+                        </li>
+                    {% elif CURRENT_USER_ROLE == 'Supervisor' %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'dashboard:supervisor' %}"><i class="bi bi-clipboard2-data me-1"></i> Supervisor History</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'machines:list' %}"><i class="bi bi-cpu me-1"></i> Machines</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'manuals:list' %}"><i class="bi bi-file-earmark-pdf me-1"></i> Manuals</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'audit_logs:log_list' %}"><i class="bi bi-shield-check me-1"></i> Audit Trail</a>
+                        </li>
+                    {% else %}
+                        <!-- Engineer Navigation -->
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'dashboard:engineer' %}"><i class="bi bi-chat-left-dots me-1"></i> AI Assistant</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'machines:list' %}"><i class="bi bi-cpu me-1"></i> Equipment</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'manuals:list' %}"><i class="bi bi-file-earmark-pdf me-1"></i> Manuals Library</a>
+                        </li>
+                    {% endif %}
+                </ul>
+
+                <div class="d-flex align-items-center gap-3">
+                    <!-- Provider pill indicator -->
+                    <span class="badge bg-dark border border-secondary text-secondary d-none d-xl-inline">
+                        <i class="bi bi-robot text-info me-1"></i> LLM: {{ AI_PROVIDER|upper }} | {{ AI_MODEL }}
+                    </span>
+
+                    <!-- User Role Badge -->
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge badge-role 
+                            {% if CURRENT_USER_ROLE == 'Administrator' %}badge-role-admin
+                            {% elif CURRENT_USER_ROLE == 'Supervisor' %}badge-role-supervisor
+                            {% else %}badge-role-engineer{% endif %}">
+                            {{ CURRENT_USER_ROLE|default:"User" }}
+                        </span>
+                        <span class="text-white fw-medium">{{ user.username }}</span>
+                    </div>
+
+                    <a href="{% url 'accounts:logout' %}" class="btn btn-sm btn-outline-industrial" title="Sign Out">
+                        <i class="bi bi-box-arrow-right"></i>
+                    </a>
+                </div>
+                {% else %}
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="btn btn-sm btn-primary-industrial" href="{% url 'accounts:login' %}">Sign In</a>
+                    </li>
+                </ul>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Global Flash Alerts -->
+    <div class="container-fluid px-4 mt-3">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{% if message.tags == 'error' %}danger{% elif message.tags == 'info' %}primary{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
+                    <i class="bi bi-info-circle me-2"></i> {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <!-- Main Content Container -->
+    <main class="container-fluid px-4 py-3 flex-grow-1">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Global Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="spinner-industrial mb-3"></div>
+        <div id="loadingMessage" class="text-white fw-medium fs-5">Processing Equipment Manual Query...</div>
+        <div class="text-secondary small mt-2">Vector similarity matching & source citation verification in progress</div>
+    </div>
+
+    <!-- Application Footer -->
+    <footer>
+        <div class="container-fluid px-4 d-flex justify-content-between align-items-center">
+            <div>
+                <strong>Manufacturing Manual AI Assistant</strong> &mdash; Production Hackathon Edition
+            </div>
+            <div class="text-secondary small">
+                PyMuPDF &bull; Strict Machine Isolation &bull; Django &bull; PostgreSQL
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/app.js"></script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>
